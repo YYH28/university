@@ -28,7 +28,6 @@ def sum_list(items):
 
 def point_pr(gr,file):
 #每个省份的经纬度
-    print(gr)
     for line in gr:
         # line是个list，取得所有需要的值
         b = line[0] #将第一列city读取出来并清除不需要字符
