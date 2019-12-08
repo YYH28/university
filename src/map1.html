@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <script type="text/javascript" src="//api.map.baidu.com/api?v=2.0&ak=8atpMUyuexdbuYFU838ejPvSPnWYZoks"></script>
+    <script type="text/javascript" src="//api.map.baidu.com/library/Heatmap/2.0/src/Heatmap_min.js"></script>
+    <title>本一批</title>
+    <style type="text/css">
+        ul,li{list-style: none;margin:0;padding:0;float:left;}
+        html{height:100%}
+        body{height:100%;margin:0px;padding:0px;font-family:"微软雅黑";}
+        #container{height:500px;width:100%;}
+        #r-result{width:100%;}
+    </style>
+    </head>
+<body>
+<div id="container"></div>
+<div id="r-result">
+    <input type="button"  onclick="openHeatmap();" value="显示热力图"/><input type="button"  onclick="closeHeatmap();" value="关闭热力图"/>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    var map = new BMap.Map("container");          // 创建地图实例
+
+    var point = new BMap.Point(119.302446,26.10634);//定义一个中心点坐标
+    map.centerAndZoom(point, 15);             // 初始化地图，设置中心点坐标和地图级别
+    map.enableScrollWheelZoom(); // 允许滚轮缩放
+
+    var points =[
+        {"lat":36.2921024798988,"lng":100.62662114445924,"count":630},{"lat":31.03605985984831,"lng":120.30759988629661,"count":585},{"lat":39.15348514470478,"lng":117.20359278135501,"count":584},{"lat":22.535995532857303,"lng":113.99913767852527,"count":578},{"lat":30.657041771323716,"lng":104.08282275849255,"count":577},{"lat":29.28949994143599,"lng":120.20557850425757,"count":573},{"lat":22.655981918507194,"lng":114.03089852744777,"count":572},{"lat":34.740396071091155,"lng":101.62247338027404,"count":560},{"lat":22.538378439501724,"lng":114.00061098939172,"count":551},{"lat":36.06645500642709,"lng":103.83318221998086,"count":529},{"lat":40.63949807870581,"lng":117.37778715533908,"count":528},{"lat":25.05246204072359,"lng":102.7166211583801,"count":527},{"lat":23.739624177535323,"lng":114.70424318495056,"count":526},{"lat":39.22902269084472,"lng":117.14228756250436,"count":519},{"lat":22.536703132123012,"lng":113.99907973781991,"count":345},{"lat":39.910924547299565,"lng":116.4133836971231,"count":0},{"lat":22.53581126769833,"lng":113.99743053873469,"count":0},{"lat":31.65540505481647,"lng":119.74746382114418,"count":0},{"lat":29.48708098348872,"lng":106.13649915917388,"count":0},{"lat":23.087955698235312,"lng":113.30709326471913,"count":0},{"lat":22.53625465531624,"lng":113.99830081711247,"count":0},{"lat":43.84356783457924,"lng":126.55563450495482,"count":0},{"lat":38.464453346515356,"lng":106.17116945214102,"count":0},{"lat":25.134719801670993,"lng":98.5790311011298,"count":0},{"lat":22.537232055797077,"lng":113.99822095775265,"count":0},{"lat":31.235929042252014,"lng":121.48053886017651,"count":0},{"lat":39.093667843403956,"lng":117.2095232146708,"count":0},{"lat":36.65186219609679,"lng":117.00542541805672,"count":0},{"lat":30.188062675913905,"lng":121.14878143025066,"count":0},{"lat":29.568996245338923,"lng":106.55843415537664,"count":0},{"lat":36.65186219609679,"lng":117.00542541805672,"count":0},
+    ];
+
+    if(!isSupportCanvas()){
+        alert('热力图目前只支持有canvas支持的浏览器,您所使用的浏览器不能使用热力图功能~')
+    }
+    //详细的参数,可以查看heatmap.js的文档 https://github.com/pa7/heatmap.js/blob/master/README.md
+    //参数说明如下:
+    /* visible 热力图是否显示,默认为true
+     * opacity 热力的透明度,1-100
+     * radius 势力图的每个点的半径大小
+     * gradient  {JSON} 热力图的渐变区间 . gradient如下所示
+     *	{
+            .2:'rgb(0, 255, 255)',
+            .5:'rgb(0, 110, 255)',
+            .8:'rgb(100, 0, 255)'
+        }
+        其中 key 表示插值的位置, 0~1.
+            value 为颜色值.
+     */
+    heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":20});
+    map.addOverlay(heatmapOverlay);
+    heatmapOverlay.setDataSet({data:points,max:100});
+    //是否显示热力图
+    function openHeatmap(){
+        heatmapOverlay.show();
+    }
+    function closeHeatmap(){
+        heatmapOverlay.hide();
+    }
+    closeHeatmap();
+    function setGradient(){
+        /*格式如下所示:
+       {
+             0:'rgb(102, 255, 0)',
+             .5:'rgb(255, 170, 0)',
+             1:'rgb(255, 0, 0)'
+       }*/
+        var gradient = {};
+        var colors = document.querySelectorAll("input[type='color']");
+        colors = [].slice.call(colors,0);
+        colors.forEach(function(ele){
+            gradient[ele.getAttribute("data-key")] = ele.value;
+        });
+        heatmapOverlay.setOptions({"gradient":gradient});
+    }
+    //判断浏览区是否支持canvas
+    function isSupportCanvas(){
+        var elem = document.createElement('canvas');
+        return !!(elem.getContext && elem.getContext('2d'));
+    }
+</script>
