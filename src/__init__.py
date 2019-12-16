@@ -6,39 +6,52 @@
 import xlrd
 import matplotlib.pyplot as plt
 import numpy as np
-import json
 from urllib.request import urlopen, quote
 import requests,csv
 import pandas as pd #导入这些库后边都要用到
 from src.baseFunction import getlnglat
 from src.baseFunction import sum_list
 from src.baseFunction import point_pr
+from pyecharts import Line
+import json
+from werkzeug.utils import redirect
+from flask import Flask, jsonify, render_template, request, url_for
+app = Flask(__name__)
+
 #设置中文乱码
 from pylab import *
 mpl.rcParams['font.sans-serif'] = ['SimHei']
-excel_path="..\\grade.xlsx"
-#打开文件，获取excel文件的workbook（工作簿）对象
-excel=xlrd.open_workbook(excel_path,encoding_override="utf-8")
-# 返回所有Sheet对象的list
-all_sheet=excel.sheets()
-#循环遍历每个sheet对象存储表中所有数据
-grade_list=[]
-#列表分类名称
-grade_sort=[]
-#省份列表
-province_list=[]
-#计数
-count=0
-#平均数和
-sum = 0
-#将前十的省份和平均数存进列表
-province_dict_keys=[]
-province_dict_values=[]
 
-province_dict={ }  #省份字典
 
 def main():
+    excel_path="..\\grade.xlsx"
+    #打开文件，获取excel文件的workbook（工作簿）对象
+    excel=xlrd.open_workbook(excel_path,encoding_override="utf-8")
+    # 返回所有Sheet对象的list
+    all_sheet=excel.sheets()
+    #循环遍历每个sheet对象存储表中所有数据
+    grade_list=[]
+    # 将文件中数据存进grade_list
+    for sheet in all_sheet:
+        for each_row in range(sheet.nrows):#循环打印每一行
+            grade_list.append(sheet.row_values(each_row))
+    # 将表头说明放入grade_sort
+    grade_sort=grade_list[0]
+    # 删除列表['省份', '批次', '科类', '省控线', '最高分', '最低分', '平均分', '年份']
+    grade_list.pop(0)
+    #列表分类名称
+    grade_sort=[]
+    #省份列表
+    province_list=[]
+    #计数
+    count=0
+    #平均数和
+    sum = 0
+    #将前十的省份和平均数存进列表
+    province_dict_keys=[]
+    province_dict_values=[]
 
+    province_dict={ }  #省份字典
     #查找相应批次和专业，算平均数
     def batch(batch_bactch,bacth_class):
         sum=0
@@ -46,8 +59,10 @@ def main():
         for e in province_dict:
             for grade_list_row in grade_list:
                 if e==grade_list_row[0]:
-                    if batch_bactch in grade_list_row[1] and bacth_class in grade_list_row[2]:
-                        sum += grade_list_row[6]
+                    if ''==e or ''==grade_list_row[0]:
+                        continue
+                    elif batch_bactch in grade_list_row[1] and bacth_class in grade_list_row[2]:
+                        sum += int(grade_list_row[6])
                         count += 1
             if count >= 1:
                 province_dict[e]=int(sum/count)
@@ -57,14 +72,6 @@ def main():
             count=0
         return province_dict
 
-    # 将文件中数据存进grade_list
-    for sheet in all_sheet:
-        for each_row in range(sheet.nrows):#循环打印每一行
-            grade_list.append(sheet.row_values(each_row))
-    # 将表头说明放入grade_sort
-    grade_sort=grade_list[0]
-    # 删除列表['省份', '批次', '科类', '省控线', '最高分', '最低分', '平均分', '年份']
-    grade_list.pop(0)
 
     # 提取省份
     for grade_list_row in grade_list:
@@ -120,10 +127,11 @@ def main():
     #分析福建省这3年各批次成绩情况，使用折线图展示结果，并预测2019年录取成绩
     #提取福建省
     for grade_list_row in grade_list:
-        if grade_list_row[0] in "福建省":
+        if grade_list_row[0] =="福建":
             grade_fujian.append(grade_list_row)
     for e in grade_fujian:
         if '提前批航海类' in e[1] and e[2] in '理工':
+            print(e[6])
             grade.append(e[6])
         elif '师范类(面向全省)' in e[1] and e[2] in '理工':
             grade1.append(e[6])
@@ -169,6 +177,7 @@ def main():
     grade7_7.append(sum_list(grade7_7))
     #折线图
     plt.figure()
+    print(grade_year,grade)
     plt.plot(grade_year,grade,'ro-', color='#4169E1', alpha=0.8, label='提前批航海类（理工）')
     plt.plot(grade_year,grade1,'ro-', color='#FFFA12', alpha=0.8, label='师范类(面向全省)（理工）')
     plt.plot(grade_year,grade2,'ro-', color='#78FF1D', alpha=0.8, label='师范类(面向厦门)（理工）')
@@ -200,8 +209,8 @@ def main():
     plt.title("福建省这3年文史各批次成绩情况") #标题
     # plt.savefig('./logging/%s_all_c.jpg' % log)   #图片的存储
     #显示图示
-    plt.legend()
-    plt.show()
+    # plt.legend()
+    # plt.show()
 
     gr=batch('本一批','理工')
     gr=sorted(gr.items(),key=lambda x:x[1],reverse=True)
@@ -239,5 +248,88 @@ def main():
         # print(str_temp) #也可以通过打印出来，把数据copy到百度热力地图api的相应位置上
         file.write(str_temp) #写入文档
     file.close()
-if __name__=='__main__':
+
+    province_dict_keys2=[]
+    province_dict_values2=[]
+    gr3=batch('本二批','')
+    for e in gr3.items():
+        if ''==e[0]:
+            continue
+        else:
+            province_dict_keys2.append(e[0])
+            province_dict_values2.append(e[1])
+    # line =Line("本二批情况分析")
+    # line.add("本二批", province_dict_keys2, province_dict_values2, mark_point=["average"])
+    # line.show_config()
+    # line.render('./pyecharts-line.html')
+
+    def province_line(province):
+        print(province)
+        grade1_year=[2016,2017,2018]
+        grade_priv=[]
+        for e in grade1_year:
+            count=0
+            sum=0
+            for grade_list_row in grade_list:
+                if e ==grade_list_row[7] and province==grade_list_row[0]:
+                    sum+=grade_list_row[6]
+                    count+=1
+            if count>1:
+                grade_priv.append(sum/count)
+            else:
+                grade_priv.append(sum)
+        plt.figure()
+        print(grade1_year,grade_priv)
+        plt.plot(grade1_year,grade_priv,'ro-', color='#4169E1', alpha=0.8)
+        for x,y in zip(grade1_year,grade_priv):
+            plt.text(x, y+1,str(y), ha='center', va='bottom', fontsize=7)
+        plt.xlabel("年份") #X轴标签
+        plt.ylabel("分数线") #Y轴标签
+        plt.title("成绩情况") #标题
+        plt.savefig('./static/logging/2019-12-08_all_d.jpg')   #图片的存储
+    @app.route("/one")
+    def one():
+        return render_template("one.html")
+
+    @app.route("/a")
+    def a():
+        return render_template("2.html")
+
+    @app.route("/3")
+    def b():
+        return render_template("3.html")
+
+    @app.route("/map")
+    def c():
+        return render_template("map.html")
+
+    @app.route("/map1")
+    def d():
+        return render_template("map1.html")
+
+    @app.route("/map2")
+    def e():
+        return render_template("map2.html")
+
+    @app.route("/4")
+    def f():
+        return render_template("4.html")
+
+    @app.route("/province-line")
+    def g():
+        return render_template("province-line.html")
+
+    @app.route("/index")
+    def index():
+        return render_template("Base.html")
+
+    @app.route('/test',methods=['POST'])
+    def testGet():
+        province = request.form.get('province')  #参数名为username
+        province_line(str(province))
+        print("执行get")
+        return render_template("Base.html")
+
+if __name__ == '__main__':
     main()
+    app.run(host='127.0.0.1', port=8080, debug=True)

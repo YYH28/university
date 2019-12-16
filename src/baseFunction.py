@@ -24,7 +24,7 @@ def sum_list(items):
     for x in items:
         sum_numbers += x
         count+=1
-    return int(sum_numbers/count)
+    return float(sum_numbers/count)
 
 def point_pr(gr,file):
 #每个省份的经纬度

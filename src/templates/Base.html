@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>集美大学录取分数</title>
+</head>
+<body>
+    <div style="display: flex;padding: 10px;">
+        <button onclick="change(1)">排名前10的省份</button>
+        <button onclick="change(2)">福建省这3年理工各批次成绩情况</button>
+        <button onclick="change(3)">福建省这3年文史各批次成绩情况</button>
+        <button onclick="change(4)">理工本一批成绩情况热力图</button>
+        <button onclick="change(5)">本一批成绩情况热力图</button>
+        <button onclick="change(6)">所有录取成绩情况热力图</button>
+        <button onclick="change(7)">本二批成绩情况</button>
+    </div>
+
+
+    <iframe src=""
+            width="1300px" height="550px"   frameborder="1/0"
+            name=""  scrolling="no" id="iframe-a"></iframe>
+
+    <form action="/test" method="post">
+        <input type="text" name="province" >
+        <input type="submit" value="提交" id="tijiao" onclick="change(8)">
+    </form>
+    <br>
+    <iframe src="http://127.0.0.1:8080/province-line"
+            width="650px" height="500px"   frameborder="1/0"
+            name="" id="iframe-b" scrolling="no"></iframe>
+</body>
+<script>
+    var iframe_a=document.getElementById("iframe-a")
+    function change(e) {
+        if(e==1){
+            iframe_a.src="http://127.0.0.1:8080/one"
+        }
+        else if(e==2){
+            iframe_a.src="http://127.0.0.1:8080/a"
+        }
+        else if(e==3){
+            iframe_a.src="http://127.0.0.1:8080/3"
+        }
+        else if(e==4){
+            iframe_a.src="http://127.0.0.1:8080/map"
+        }
+        else if(e==5){
+            iframe_a.src="http://127.0.0.1:8080/map1"
+        }
+        else if(e==6){
+            iframe_a.src="http://127.0.0.1:8080/map2"
+        }
+        else if(e==7){
+            iframe_a.src="http://127.0.0.1:8080/4"
+        }
+        else if(e==8){
+            document.getElementById('iframe-b').contentWindow.location.reload();
+        }
+    }
+</script>
+</html>
