@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>集美大学录取分数</title>
+</head>
+<body>
+    <div style="display: flex">
+        <div>
+            <form action="/test" method="post">
+                <input type="text" name="year" >
+                <input type="submit" value="提交" id="tijiao" onclick="change(8)">
+            </form>
+            <br>
+            <iframe src="http://127.0.0.1:8080/ten"
+                    width="850px" height="400px"   frameborder="1/0"
+                    name="" id="iframe-b" scrolling="no"></iframe>
+        </div>
+        <div style="width: 10px;height: 5px"></div>
+        <br><br><br>
+        <iframe src="http://127.0.0.1:8080/pie_batch"
+                width="700px" height="500px"   frameborder="1/0"
+                name="" scrolling="no"></iframe>
+    </div>
+
+    <div>
+        <form action="/test1" method="post">
+            <input type="text" name="otherProvince" >
+            <input type="submit" value="提交" id="tijiao1" onclick="change(2)">
+        </form>
+        <br>
+        <iframe src="http://127.0.0.1:8080/otherProvince"
+                width="850px" height="400px"   frameborder="1/0"
+                name="" id="iframe-c" scrolling="no"></iframe>
+    </div>
+</body>
+<script>
+
+    function change(e) {
+        if(e==1){
+            iframe_a.src="http://127.0.0.1:8080/one"
+        }
+        else if(e==8){
+            document.getElementById('iframe-b').contentWindow.location.reload();
+        }
+        else if(e==2){
+            document.getElementById('iframe-c').contentWindow.location.reload();
+        }
+    }
+</script>
+</html>
